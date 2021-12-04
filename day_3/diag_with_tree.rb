@@ -12,9 +12,8 @@ def part_by_msb(numbers, mask = 1 << Math.log(numbers.max, 2))
                     [0, []]
                 end
             end
-        # trees unused here
-        counts, trees = count_tree_pairs.transpose
-        [counts.sum, count_tree_pairs]
+            
+        [count_tree_pairs.transpose.first.sum, count_tree_pairs]
     else
         [1, numbers]
     end
