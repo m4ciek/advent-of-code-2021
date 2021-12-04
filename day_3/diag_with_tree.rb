@@ -20,24 +20,15 @@ def part_by_msb(numbers, mask = 1 << Math.log(numbers.max, 2))
     end
 end
 
-def walk(tree, compare_method)
-    l_size, l_tree = tree[0]
-    r_size, r_tree = tree[1]
-
-    if l_size == 0
-        [ 1, *walk(r_tree, compare_method)]
-    elsif r_size == 0
-        [ 0, *walk(l_tree, compare_method)]
-    elsif tree.size == 2
-        # left is 0, right is 1
-        if l_size.method(compare_method)[r_size]
-            [0, *walk(l_tree, compare_method)]
+def walk((l_size, l_tree), (r_size, r_tree), compare_method)
+    digit, go =
+        if l_size > 0 && (r_size == 0 || l_size.method(compare_method)[r_size])
+            [0, l_tree]
         else
-            [1, *walk(r_tree, compare_method)]
+            [1, r_tree]
         end
-    else
-        tree
-    end
+
+    [digit, *(go.size == 2 ? walk(*go, compare_method) : go)]
 end
 
 numbers = ARGF.map do |bin_as_str|
@@ -47,5 +38,5 @@ end
 tree = part_by_msb(numbers)
 
 puts (%i(> <=).map do |compare_method|
-    walk(tree.last, compare_method).last
+    walk(*tree.last, compare_method).last
 end.reduce(:*))
