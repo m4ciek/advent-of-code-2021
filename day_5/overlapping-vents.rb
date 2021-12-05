@@ -24,7 +24,7 @@ segs2 = paths.flat_map do |point_to_point|
   integer_mtd = %i[downto upto].map { |sym| Integer.instance_method(sym) }
 
   x_y_steps =
-    point_to_point.each_slice(2).to_a.transpose.map do |p1, p2|
+    point_to_point.each_slice(2).reduce(:zip).map do |p1, p2|
       integer_mtd[p1 > p2 ? 0 : 1].bind(p1)[p2]
     end
 
