@@ -22,11 +22,12 @@ puts(
     end
 
     format(
-      "part %d:\ttotal is %d (%d mature, %d juvenile)",
+      "part %d:\ttotal is %d (%d mature, %d juvenile; simulation ran %d simulated days)",
       run_number,
       popl.sum + juveniles.last(2).sum,
       popl.sum,
-      juveniles.last(2).sum
+      juveniles.last(2).sum,
+      days
     )
   end.join("\n")
 )
