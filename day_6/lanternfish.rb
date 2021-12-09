@@ -21,9 +21,8 @@ puts(
         juveniles.sum,
         day
       )
+      break report.join("\n\n") if REPORT_AT.size == report.size
     end
-
-    break report.join("\n\n") if REPORT_AT.size == report.size
 
     j_cyc = day % 2
     popl_cyc = day % MAX_STATE_PLUS_ONE
