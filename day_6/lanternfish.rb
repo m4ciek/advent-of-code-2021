@@ -1,31 +1,32 @@
 #!/usr/bin/env ruby
 
-MAX_STATE = 7
+MAX_STATE = 6
 
-FISH_INIT_STATE = ARGF.read.split(',').map do |fish|
-  MAX_STATE.pred - fish.to_i
+popl_initial = (
+  ('0'..MAX_STATE.to_s).map { |i| [i, 0] } +
+    ARGF.read.strip.split(',').tally.to_a
+).group_by(&:first).map do |_k, v|
+  v.map(&:last).sum
 end
 
-states = [80].map do |days|
-  [days, (
-    (FISH_INIT_STATE.map.with_index do |this_fish, idx|
-      print "simulating descendants of fish ##{idx}: "
-      days.times.reduce([[this_fish]]) do |s, _i|
-        puts "generation #{_i}; population size: #{s.last.size}"
-        s << s.last.flat_map do |old_fish|
-          fish = old_fish.succ
-          if (fish % MAX_STATE).zero? && fish.positive?
-            [fish, -2]
-          else
-            fish
-          end
-        end
-      end
-    end)
-  )]
-end
+puts(
+  [80, 256].map.with_index do |days, run_number|
+    popl = popl_initial.dup
+    juveniles = [0,0]
+    days.times do
+      new_adults = juveniles[0]
+      juveniles[0] = popl[0]
+      popl[0] += new_adults
+      juveniles.rotate!
+      popl.rotate!
+    end
 
-#  format('after %d days, population is %d', days, states.last.count)
-#end.join("\n"))
-
-binding.pry
+    format(
+      "part %d:\ttotal is %d (%d mature, %d juvenile)",
+      run_number,
+      popl.sum + juveniles.last(2).sum,
+      popl.sum,
+      juveniles.last(2).sum
+    )
+  end.join("\n")
+)
