@@ -2,33 +2,48 @@
 
 side_padded_height_map =
   ARGF.map do |line|
-    [10, *line.strip.split(//).map(&:to_i), 10]
+    (Array.new(2, 9) + line.strip.split(//).map(&:to_i)).rotate
   end
 
-height_map =
-  (
-    [Array.new(side_padded_height_map.map(&:size).max, 10)] * 2
-  ).insert(1, *side_padded_height_map)
+PADDED_ROW_WIDTH = side_padded_height_map.map(&:size).max
 
-rows, cols =
-  [height_map, height_map.transpose].map do |rows_or_cols_padded|
+height_map = (
+  Array.new(2, Array.new(PADDED_ROW_WIDTH, 9)) +
+  side_padded_height_map
+).rotate
+
+rows_cols =
+  [height_map, height_map.transpose].flat_map.with_index do |rows_or_cols_padded, rotate_coords|
     rows_or_cols_padded[1...-1].flat_map.with_index do |row_or_col, major_idx|
-      row_or_col.each_cons(3).map.with_index do |point, minor_idx|
-        [[major_idx, minor_idx], point[1]] if point[1] < point[0] && point[1] < point[2]
+      row_or_col.each_cons(3).map.with_index do |(left, value, right), minor_idx|
+        [[major_idx, minor_idx].rotate(rotate_coords), value] if value < left && value < right
       end.compact
     end
   end
 
-solution_one =
-  (
-    cols +
-    rows.map do |coord, point|
-      [coord.reverse, point]
-    end
-  ).tally(&:first).find_all do |_, v|
-    v > 1
-  end.map(&:first).map(&:last).map(&:succ).sum
+pits = rows_cols.tally(&:first).select { |_, v| v > 1 }.keys
+
+solution_one = pits.map(&:last).map(&:succ).sum
 
 puts "part 1:\t#{solution_one}"
 
-#binding.pry
+# totally different approach for part two.
+# ah, I have it now. recursive up/down exploration with horizontal propagation. work from
+# the previous solution.
+#
+# pits structure:
+# an array where each entry is of size 2. first: coordinate pair; last: value at that point
+# use the padded height_map for this
+
+pits.map do |(col_unpadded, row_unpadded), value|
+  col = col_unpadded.succ
+  row = row_unpadded.succ
+  #p [col,row,value,height_map[row][col]]
+  #col.pred.downto(0)
+  #col.succ.upto()
+  #height_map[row]
+  # scan the current row
+  # proceed recursively in the up and down directions
+end
+
+binding.pry
